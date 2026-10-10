@@ -115,8 +115,9 @@ async function getUserPhoneNumber(phoneCode) {
 
 /* ------------------------------- 主流程 ------------------------------- */
 exports.main = async (event) => {
-  // 注意：不再接受客户端传来的 phone，手机号一律由 phoneCode 服务端解密得到
-  const { code, phoneCode, role, nickname, avatar } = event;
+  // 注意：不再接受客户端传来的 phone / role
+  //   手机号一律由 phoneCode 服务端解密得到，角色一律由后台配置决定，防止客户端自选提权
+  const { code, phoneCode, nickname, avatar } = event;
   if (!code) throw new Error('缺少登录 code');
   if (APPID === 'YOUR_APPID' || SECRET === 'YOUR_SECRET') {
     throw new Error('请先在云函数环境变量配置 WX_APPID / WX_SECRET');
@@ -146,14 +147,21 @@ exports.main = async (event) => {
     throw new Error(`获取手机号失败：${e.message}`);
   }
 
-  // 3) 角色：演示手机号优先，否则沿用客户端所选
-  let finalRole = 'user';
-  if (finalPhone && DEMO[finalPhone]) finalRole = DEMO[finalPhone];
-  else if (role) finalRole = role;
-
-  // 4) upsert 用户
+  // 3) upsert 用户
   const users = db.collection('users');
   const existing = await users.where({ openid }).get();
+
+  // 角色由后台配置决定，不接受客户端自选，避免用户把自己提权成管理员
+  let finalRole;
+  if (existing.data.length === 0) {
+    // 新用户：按手机号查后台角色配置
+    // TODO: DEMO 是占位实现，生产应改为查「角色配置表」或运营后台白名单
+    finalRole = DEMO[finalPhone] || 'user';
+  } else {
+    // 老用户：保留后台已设定的角色，不因重新登录被重置成普通用户
+    finalRole = existing.data[0].role || 'user';
+  }
+
   const payload = {
     openid,
     phone: finalPhone,
@@ -173,7 +181,7 @@ exports.main = async (event) => {
     await users.doc(_id).update({ data: payload });
   }
 
-  // 5) 返回给客户端，去掉 sessionKey
+  // 4) 返回给客户端，去掉 sessionKey
   return {
     _id,
     openid,

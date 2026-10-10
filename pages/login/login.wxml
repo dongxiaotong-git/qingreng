@@ -37,22 +37,6 @@
       <view wx:if="{{phone}}" class="tip">✓ 已通过微信授权获取</view>
     </view>
 
-    <view class="label">选择身份</view>
-    <view class="roles">
-      <view
-        wx:for="{{roles}}"
-        wx:key="id"
-        class="role {{selectedRole === item.id ? 'role-active' : ''}}"
-        data-role="{{item.id}}"
-        bindtap="selectRole"
-      >
-        <view class="role-name">{{item.name}}</view>
-        <view class="role-desc">{{item.desc}}</view>
-      </view>
-    </view>
-
-    <view class="hint">{{demoHint}}</view>
-
     <!-- 登录按钮即手机号授权按钮：点一次 = 授权手机号 + wx.login 登录 -->
     <button
       class="btn-primary login-btn"

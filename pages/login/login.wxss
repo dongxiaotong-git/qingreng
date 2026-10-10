@@ -105,43 +105,7 @@
   margin-top: 10rpx;
 }
 
-.roles {
-  display: flex;
-  gap: 18rpx;
-  margin-bottom: 24rpx;
-}
-.role {
-  flex: 1;
-  border: 2rpx solid #e5e5e5;
-  border-radius: 16rpx;
-  padding: 22rpx 14rpx;
-  text-align: center;
-  background: #fff;
-}
-.role-active {
-  border-color: #07c160;
-  background: #eafaf0;
-}
-.role-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-.role-desc {
-  font-size: 20rpx;
-  color: #999;
-  margin-top: 8rpx;
-}
-
-.hint {
-  font-size: 22rpx;
-  color: #999;
-  background: #f7f8fa;
-  border-radius: 12rpx;
-  padding: 16rpx;
-  margin-bottom: 28rpx;
-  line-height: 1.5;
-}
+/* 登录页不再提供身份选择，角色由后台按手机号配置 */
 
 .login-btn {
   width: 100%;

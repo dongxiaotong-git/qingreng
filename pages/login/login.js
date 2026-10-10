@@ -6,16 +6,9 @@ Page({
   data: {
     avatar: '',
     nickname: '',
-    phone: '',        // 仅展示用：来自上次登录回填或本次授权解密结果
-    phoneCode: '',    // 本次授权拿到的手机号 code
-    selectedRole: 'user',
-    loading: false,
-    roles: [
-      { id: 'user', name: '普通用户', desc: '下单查看' },
-      { id: 'courier', name: '接单员', desc: '接单/完成' },
-      { id: 'admin', name: '管理员', desc: '查看全部' }
-    ],
-    demoHint: '手机号由微信授权自动获取，不会手动输入；身份仅在演示环境手动选择，正式环境应由后台按手机号配置。'
+    phone: '',      // 仅展示用：来自上次登录回填或本次授权解密结果
+    phoneCode: '',  // 本次授权拿到的手机号 code（一次性）
+    loading: false
   },
 
   onLoad() {
@@ -25,8 +18,7 @@ Page({
       this.setData({
         avatar: user.avatar || '',
         nickname: user.nickname || '',
-        phone: user.phone || '',
-        selectedRole: user.role || 'user'
+        phone: user.phone || ''
       });
     }
   },
@@ -42,13 +34,10 @@ Page({
     this.setData({ nickname: e.detail.value || e.detail.nickName || '' });
   },
 
-  selectRole(e) {
-    this.setData({ selectedRole: e.currentTarget.dataset.role });
-  },
-
   /**
    * 登录：本按钮 open-type="getPhoneNumber"，点击即同时触发手机号授权。
    * 拿到 phoneCode 后立刻 wx.login() 拿 code，两者一起交给云函数。
+   * 角色不由用户选择，由云函数按手机号查后台配置决定。
    */
   onLogin(e) {
     if (this.data.loading) return;
@@ -82,7 +71,6 @@ Page({
     api.login({
       phone: d.phone,
       phoneCode: phoneCode,
-      role: d.selectedRole,
       nickname: d.nickname,
       avatar: d.avatar
     })
