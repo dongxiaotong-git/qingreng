@@ -48,17 +48,22 @@ Page({
     const authorized = !!code && errMsg.indexOf('ok') !== -1;
 
     if (!authorized) {
-      // 云模式：手机号是必填，拿不到就阻断并提示重新授权
-      if (USE_CLOUD) {
-        wx.showToast({ title: '请先授权手机号', icon: 'none' });
-        return;
-      }
-      // 演示模式（无真实 AppID）无法授权，降级放行以便继续体验
-      wx.showToast({ title: '演示模式：跳过手机号', icon: 'none' });
-      this.doLogin('');
+      // 手机号是必需项：拿不到授权就不放行登录，不能静默跳过这一步。
+      // 常见原因：微信开发者工具不支持手机号授权模拟（必须真机），
+      // 或小程序是个人主体（无 getPhoneNumber 权限），或用户在弹窗里点了拒绝。
+      wx.showModal({
+        title: '需要授权手机号',
+        content:
+          '本小程序需授权手机号才能登录。\n\n' +
+          '若未弹出选择框，通常是微信开发者工具不支持该能力的模拟，' +
+          '请用「真机预览」或体验版测试。',
+        showCancel: false,
+        confirmText: '知道了'
+      });
       return;
     }
 
+    // 已选完手机号 -> 走 wx.login 登录
     this.setData({ phoneCode: code });
     this.doLogin(code);
   },
@@ -81,7 +86,11 @@ Page({
         if (user.phone) {
           this.setData({ phone: user.phone });
         }
-        wx.showToast({ title: '登录成功', icon: 'success' });
+        // 演示模式没有服务端，phoneCode 解不出明文，明确告知而不是留个空格子
+        const tip = (!USE_CLOUD && phoneCode && !user.phone)
+          ? '登录成功·演示模式无法解密手机号'
+          : '登录成功';
+        wx.showToast({ title: tip, icon: 'none', duration: 2200 });
         setTimeout(() => {
           wx.reLaunch({ url: '/pages/home/home' });
         }, 600);

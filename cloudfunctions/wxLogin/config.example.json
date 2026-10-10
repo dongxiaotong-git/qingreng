@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "openapi": []
-  },
-  "env": {
-    "WX_APPID": "wxde5a0d0535b61047",
-    "WX_SECRET": "填写你的AppSecret"
-  }
-}

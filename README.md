@@ -48,8 +48,34 @@
 2. AppID：`project.config.json` 中已填 `wxde5a0d0535b61047`；换成自己的小程序时改这个字段，并开通云开发。
 3. 编译后即可在模拟器中操作。
 
-> 云函数密钥配置：`cloudfunctions/wxLogin/config.json` 里同样要填 `WX_APPID`（已填同一个 AppID）+ `WX_SECRET`。
-> 该文件含 AppSecret，**已被 `.gitignore` 排除不会入库**；换机器时把同目录的 `config.example.json` 复制成 `config.json`，再填 AppSecret。
+### ⚠️ 手机号授权必须用真机测试
+
+「微信一键登录」按钮是 `open-type="getPhoneNumber"`，点它会弹出微信的手机号选择框，选完自动完成登录。**这一步有两个硬限制**：
+
+| 场景 | 表现 |
+|------|------|
+| 微信开发者工具 | **不会弹出**手机号选择框（工具不支持该能力模拟），点登录会提示改用真机 |
+| 真机预览 / 体验版 | 正常弹框选手机号 → 自动登录 |
+| 个人主体小程序 | 无 `getPhoneNumber` 权限，弹框也拿不到，需换非个人主体 |
+| 演示模式 `USE_CLOUD=false` | 能弹框授权，但**没有服务端、解不出明文**，手机号为空并提示 |
+
+要看到真实手机号，必须同时满足：云开发模式（`USE_CLOUD=true` + 云环境 ID）+ 真机 + 非个人主体。
+
+> **云函数密钥配置**：`cloudfunctions/wxLogin/config.json` 里要填 `WX_APPID`（已填同一个 AppID）+ `WX_SECRET`。
+> 该文件含 AppSecret，和 `config.example.json` 一起**被 `.gitignore` 排除，不会入库**。换机器时自己新建 `config.json`，内容如下：
+>
+> ```json
+> {
+>   "permissions": { "openapi": [] },
+>   "env": {
+>     "WX_APPID": "wxde5a0d0535b61047",
+>     "WX_SECRET": "你的AppSecret"
+>   }
+> }
+> ```
+>
+> 🔒 提交前建议自查：`git grep -n "<你的AppSecret>" $(git rev-list --all) -- .` 应无输出。
+> 若密钥曾外泄，请到微信公众平台重置。
 
 ## 四、三种角色与体验入口
 

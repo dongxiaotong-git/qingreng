@@ -1,5 +1,7 @@
 # 微信云函数本地环境变量（含 AppSecret 等密钥，切勿提交到仓库）
+# 注意：example 一同排除，避免有人把真实密钥填进示例文件后被提交
 cloudfunctions/*/config.json
+cloudfunctions/*/config.example.json
 
 # 微信开发者工具本地私有配置
 project.private.config.json
