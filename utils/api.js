@@ -50,41 +50,81 @@ function persistImage(tempPath) {
   });
 }
 
-/* ----------------------------- 对外接口 ----------------------------- */
-
-// 登录/注册：根据手机号判断角色（演示账号见 config.DEMO_ACCOUNTS）
-function login({ phone, role, nickname, avatar }) {
+// 头像持久化：wx.chooseAvatar 返回的是临时路径，重启即失效，
+// 本地模式存本地文件，云模式上传云存储，拿 fileID。
+function persistAvatar(tempPath) {
+  if (!tempPath) return Promise.resolve('');
+  // 已经是持久化地址（本地 wxfile 或云 fileID）就不重复处理
+  if (tempPath.indexOf('cloud://') === 0 || tempPath.indexOf('https://') === 0) {
+    return Promise.resolve(tempPath);
+  }
   if (USE_CLOUD) {
-    // 标准微信登录：先 wx.login() 拿 code，再让云函数用 jscode2session 换 openid
-    return new Promise((resolve, reject) => {
-      wx.login({
-        success: res => {
-          if (!res.code) return reject(new Error('获取微信登录 code 失败'));
-          callCloud('wxLogin', { code: res.code, phone, role, nickname, avatar })
-            .then(user => {
-              wx.setStorageSync(KEY_USER, user);
-              resolve(user);
-            })
-            .catch(reject);
-        },
-        fail: err => reject(err)
+    return new Promise((resolve) => {
+      const ext = (tempPath.split('.').pop() || 'png').toLowerCase();
+      const cloudPath = `avatars/${Date.now()}_${Math.floor(Math.random() * 100000)}.${ext}`;
+      wx.cloud.uploadFile({
+        cloudPath,
+        filePath: tempPath,
+        success: res => resolve(res.fileID),
+        fail: () => resolve(tempPath)
       });
     });
   }
-  return new Promise((resolve) => {
-    // 本地演示：优先使用登录页主动选择的身份；若手机号命中演示账号则覆盖。
-    let finalRole = 'user';
-    if (phone && DEMO_ACCOUNTS[phone]) finalRole = DEMO_ACCOUNTS[phone];
-    else if (role) finalRole = role;
-    const user = {
-      openid: 'local_' + (phone || 'demo'),
-      phone: phone || '',
-      nickname: nickname || '微信用户',
-      avatar: avatar || '',
-      role: finalRole
-    };
-    wx.setStorageSync(KEY_USER, user);
-    resolve(user);
+  return persistImage(tempPath);
+}
+
+/* ----------------------------- 对外接口 ----------------------------- */
+
+/**
+ * 登录/注册
+ * @param {string} phone    手动输入的手机号（微信授权失败时的兜底）
+ * @param {string} phoneCode <button open-type="getPhoneNumber"> 拿到的授权 code
+ * @param {string} role     客户端选择的身份：user | courier | admin
+ * @param {string} nickname 微信昵称填写能力拿到的昵称
+ * @param {string} avatar   微信头像填写能力拿到的临时路径
+ */
+function login({ phone, phoneCode, role, nickname, avatar }) {
+  return persistAvatar(avatar).then((savedAvatar) => {
+    if (USE_CLOUD) {
+      // 标准微信登录：先 wx.login() 拿 code，再让云函数用 jscode2session 换 openid；
+      // phoneCode 一并发给云函数，由服务端调 getuserphonenumber 解密真实手机号。
+      return new Promise((resolve, reject) => {
+        wx.login({
+          success: res => {
+            if (!res.code) return reject(new Error('获取微信登录 code 失败'));
+            callCloud('wxLogin', {
+              code: res.code,
+              phone,
+              phoneCode: phoneCode || '',
+              role,
+              nickname,
+              avatar: savedAvatar
+            })
+              .then(user => {
+                wx.setStorageSync(KEY_USER, user);
+                resolve(user);
+              })
+              .catch(reject);
+          },
+          fail: err => reject(err)
+        });
+      });
+    }
+    return new Promise((resolve) => {
+      // 本地演示：优先使用登录页主动选择的身份；若手机号命中演示账号则覆盖。
+      let finalRole = 'user';
+      if (phone && DEMO_ACCOUNTS[phone]) finalRole = DEMO_ACCOUNTS[phone];
+      else if (role) finalRole = role;
+      const user = {
+        openid: 'local_' + (phone || 'demo'),
+        phone: phone || '',
+        nickname: nickname || '微信用户',
+        avatar: savedAvatar || '',
+        role: finalRole
+      };
+      wx.setStorageSync(KEY_USER, user);
+      resolve(user);
+    });
   });
 }
 

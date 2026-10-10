@@ -6,5 +6,10 @@ exports.main = async (event) => {
   const { openid } = event;
   if (!openid) throw new Error('缺少 openid');
   const res = await db.collection('users').where({ openid }).get();
-  return res.data[0] || null;
+  const user = res.data[0];
+  if (!user) return null;
+
+  // 安全兜底：sessionKey 仅用于服务端解密，绝不下发客户端
+  const { sessionKey, ...safe } = user;
+  return safe;
 };

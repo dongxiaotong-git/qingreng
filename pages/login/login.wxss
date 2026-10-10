@@ -44,6 +44,65 @@
   font-size: 30rpx;
 }
 
+/* 头像选择按钮 */
+.avatar-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.avatar-btn {
+  width: 120rpx;
+  height: 120rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: #f7f8fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  line-height: normal;
+}
+.avatar-btn::after {
+  border: none;
+}
+.avatar-img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+}
+.avatar-default {
+  font-size: 56rpx;
+  color: #bbb;
+}
+
+/* 手机号两栏 */
+.phone-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.phone-input {
+  flex: 1;
+}
+.phone-btn {
+  width: 180rpx;
+  margin: 0;
+  line-height: 72rpx;
+  height: 72rpx;
+  font-size: 26rpx;
+}
+.phone-btn-ok {
+  color: #07c160;
+  border-color: #07c160;
+  background: #eafaf0;
+}
+.tip {
+  font-size: 22rpx;
+  color: #07c160;
+  margin-top: 10rpx;
+}
+
 .roles {
   display: flex;
   gap: 18rpx;

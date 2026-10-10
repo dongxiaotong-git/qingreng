@@ -27,10 +27,16 @@
 4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 8 个云函数：
    `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`（旧的 `login` 已被 `wxLogin` 取代，不再需要）。
 
-   > **登录流程（标准微信登录）**：客户端 `api.login` 先调 `wx.login()` 拿到 `code`，再调用云函数 `wxLogin`；云函数用
-   > `https://api.weixin.qq.com/sns/jscode2session` 以 `code` 换取 `openid` / `session_key`，再据此创建或更新 `users` 记录并返回用户信息。
+   > **登录流程（标准微信登录）**：
+   > 1. 用户在登录页点头像（`open-type="chooseAvatar"`）选头像、填昵称（`type="nickname"`）、点「微信授权」拿手机号授权 `code`；
+   > 2. 点「登录」→ `api.login()` 先调 `wx.login()` 拿到登录 `code`，并把 `code` + `phoneCode` + 昵称/头像一起传给云函数 `wxLogin`；
+   > 3. 云函数用 `jscode2session` 换 `openid` / `session_key`；
+   > 4. 若传了 `phoneCode`，云函数再拿 `access_token` 调 `https://api.weixin.qq.com/wxa/business/getuserphonenumber` 解密真实手机号（个人主体无此权限，会自动回退到手动输入的手机号，不阻断登录）；
+   > 5. 按 `openid` 创建或更新 `users` 记录，返回用户信息（**不含 `sessionKey`**）。
    >
    > ⚠️ `jscode2session` **必须在服务端调用**，不能放在小程序客户端（否则 `AppSecret` 会泄露）。请在小程序后台「开发管理 → 开发设置」拿到 AppID 和 AppSecret，并配置到 `wxLogin` 云函数的**环境变量** `WX_APPID` / `WX_SECRET`（不要在源码里硬编码）。
+   >
+   > 📌 头像来自 `chooseAvatar` 的**临时路径**，直接存会在重启后失效：本地模式会 `saveFile` 持久化，云模式会上传到云存储换 `fileID`，逻辑见 `utils/api.js` 的 `persistAvatar`。
 5. 真机/体验版中，微信支付需配合商户号并在 `create-order.js` 的 `mockPay` 处替换为 `wx.requestPayment`（由云函数统一下单返回 `prepay_id`）。
 
 ## 三、如何导入运行
