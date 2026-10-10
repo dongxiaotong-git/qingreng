@@ -45,8 +45,11 @@
 ## 三、如何导入运行
 
 1. 打开微信开发者工具 → 导入项目 → 选择本项目根目录 `trash-delivery-miniprogram/`。
-2. AppID：默认 `touristappid`（游客模式，可本地体验）；正式发布请替换为你的小程序 AppID，并开通云开发。
+2. AppID：`project.config.json` 中已填 `wxde5a0d0535b61047`；换成自己的小程序时改这个字段，并开通云开发。
 3. 编译后即可在模拟器中操作。
+
+> 云函数密钥配置：`cloudfunctions/wxLogin/config.json` 里同样要填 `WX_APPID`（已填同一个 AppID）+ `WX_SECRET`。
+> 该文件含 AppSecret，**已被 `.gitignore` 排除不会入库**；换机器时把同目录的 `config.example.json` 复制成 `config.json`，再填 AppSecret。
 
 ## 四、三种角色与体验入口
 
