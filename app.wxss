@@ -17,7 +17,8 @@ page {
 .page {
   min-height: 100vh;
   box-sizing: border-box;
-  padding-bottom: 40rpx;
+  /* 预留自定义 TabBar 高度 + 安全区，避免内容被底部栏遮挡 */
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
 .container {
