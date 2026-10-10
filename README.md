@@ -24,8 +24,8 @@
 1. 在微信开发者工具中开通「云开发」，拿到**环境 ID**。
 2. 把 `utils/config.js` 改为 `USE_CLOUD = true`，并填写 `CLOUD_ENV = '你的环境ID'`。
 3. 在云开发控制台创建数据库集合：**`orders`**、**`users`**（orders 建议加索引 `orderNo`、`status`、`openid`）。
-4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 9 个云函数：
-   `login` / `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`。
+4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 8 个云函数：
+   `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`（旧的 `login` 已被 `wxLogin` 取代，不再需要）。
 
    > **登录流程（标准微信登录）**：客户端 `api.login` 先调 `wx.login()` 拿到 `code`，再调用云函数 `wxLogin`；云函数用
    > `https://api.weixin.qq.com/sns/jscode2session` 以 `code` 换取 `openid` / `session_key`，再据此创建或更新 `users` 记录并返回用户信息。

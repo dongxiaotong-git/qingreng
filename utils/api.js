@@ -89,7 +89,10 @@ function login({ phone, role, nickname, avatar }) {
 }
 
 function getProfile() {
-  if (USE_CLOUD) return callCloud('getProfile', {});
+  if (USE_CLOUD) {
+    const user = wx.getStorageSync(KEY_USER) || {};
+    return callCloud('getProfile', { openid: user.openid });
+  }
   return Promise.resolve(wx.getStorageSync(KEY_USER) || null);
 }
 
