@@ -1,0 +1,105 @@
+<view class="page">
+  <view class="container">
+    <!-- 套餐信息 -->
+    <view class="card pkg-info" wx:if="{{pkg}}">
+      <view class="row" style="justify-content: space-between;">
+        <view class="pkg-name">{{pkg.name}}</view>
+        <view class="pkg-price">¥{{pkg.price}}</view>
+      </view>
+      <view class="text-sub" style="margin-top:8rpx;">{{pkg.desc}}</view>
+      <view wx:if="{{!pkg.needPay}}" class="text-sub" style="margin-top:8rpx;color:#07c160;">* 包周/包月套餐无需再次支付</view>
+    </view>
+
+    <view class="card">
+      <view class="section-title">填写订单</view>
+
+      <!-- 订单号 -->
+      <view class="form-row">
+        <text class="form-label">订单号</text>
+        <text class="form-value">{{orderNo || '生成中...'}}</text>
+      </view>
+
+      <!-- 地址 -->
+      <view class="form-block">
+        <text class="form-label">地址 <text class="req">*</text></text>
+        <textarea
+          class="form-textarea"
+          placeholder="请填写详细地址，明确到具体门牌号"
+          value="{{address}}"
+          bindinput="onAddressInput"
+          maxlength="100"
+        />
+      </view>
+
+      <!-- 垃圾类型 -->
+      <view class="form-block">
+        <text class="form-label">垃圾类型 <text class="req">*</text></text>
+        <view class="options">
+          <view
+            wx:for="{{trashTypes}}"
+            wx:key="id"
+            class="option {{trashTypeId === item.id ? 'option-active' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="selectTrash"
+          >{{item.name}}</view>
+        </view>
+        <view wx:if="{{showTrashTip}}" class="tip">
+          💡 温馨提示：请将垃圾袋（不超过 5 袋）放在门口即可，工作人员会按约定时间上门取走。
+        </view>
+      </view>
+
+      <!-- 日期 -->
+      <view class="form-block">
+        <text class="form-label">日期 <text class="req">*</text></text>
+        <picker mode="date" value="{{date}}" bindchange="onDateChange">
+          <view class="picker">{{date || '请选择日期'}}</view>
+        </picker>
+      </view>
+
+      <!-- 时间段 -->
+      <view class="form-block">
+        <text class="form-label">时间段 <text class="req">*</text></text>
+        <view class="options">
+          <view
+            wx:for="{{timeSlots}}"
+            wx:key="id"
+            class="option {{timeSlotId === item.id ? 'option-active' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="selectTime"
+          >{{item.name}} {{item.range}}</view>
+        </view>
+      </view>
+
+      <!-- 图片 -->
+      <view class="form-block">
+        <text class="form-label">垃圾图片 <text class="req">*</text></text>
+        <view class="img-grid">
+          <view wx:for="{{images}}" wx:key="*this" class="img-item">
+            <image class="img" src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewImage" />
+            <view class="img-del" data-index="{{index}}" catchtap="removeImage">×</view>
+          </view>
+          <view wx:if="{{images.length < maxImages}}" class="img-add" bindtap="chooseImage">＋</view>
+        </view>
+        <view class="text-sub">上传要扔的垃圾图片（最多5张）</view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="form-block">
+        <text class="form-label">备注</text>
+        <textarea
+          class="form-textarea"
+          placeholder="如有特殊说明请填写（选填）"
+          value="{{remark}}"
+          bindinput="onRemarkInput"
+          maxlength="200"
+        />
+      </view>
+    </view>
+
+    <button
+      class="btn-primary submit-btn"
+      bindtap="submit"
+      disabled="{{submitting}}"
+    >{{pkg.needPay ? '微信支付并下单' : '提交订单'}}</button>
+  </view>
+</view>

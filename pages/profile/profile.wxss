@@ -1,0 +1,91 @@
+.header {
+  background: linear-gradient(135deg, #07c160, #06a850);
+  padding: 60rpx 48rpx;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #fff;
+}
+.avatar-default {
+  text-align: center;
+  line-height: 120rpx;
+  font-size: 64rpx;
+}
+.user-meta {
+  margin-left: 28rpx;
+}
+.nickname {
+  font-size: 36rpx;
+  font-weight: 700;
+}
+.role-badge {
+  display: inline-block;
+  margin-top: 12rpx;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 24rpx;
+  padding: 4rpx 20rpx;
+  font-size: 22rpx;
+}
+.phone {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-top: 10rpx;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+.stat-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333;
+}
+.stat-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.menu {
+  padding: 0 28rpx;
+}
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 2rpx solid #f2f2f2;
+  font-size: 30rpx;
+  color: #333;
+}
+.menu-item:last-child {
+  border-bottom: none;
+}
+.arrow {
+  color: #bbb;
+  font-size: 28rpx;
+}
+
+.about {
+  text-align: center;
+  padding: 40rpx 0;
+}
+.about-title {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 600;
+}
+.about-text {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-top: 12rpx;
+  padding: 0 60rpx;
+  line-height: 1.5;
+}

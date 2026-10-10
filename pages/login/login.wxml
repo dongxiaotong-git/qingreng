@@ -1,0 +1,39 @@
+<view class="login">
+  <view class="hero">
+    <view class="logo">♻️</view>
+    <view class="title">代扔垃圾</view>
+    <view class="slogan">足不出户，垃圾有人帮扔</view>
+  </view>
+
+  <view class="card form">
+    <view class="field">
+      <text class="label">手机号（选填）</text>
+      <input
+        class="input"
+        type="number"
+        maxlength="11"
+        placeholder="用于识别角色，可留空"
+        value="{{phone}}"
+        bindinput="onInputPhone"
+      />
+    </view>
+
+    <view class="label">选择身份</view>
+    <view class="roles">
+      <view
+        wx:for="{{roles}}"
+        wx:key="id"
+        class="role {{selectedRole === item.id ? 'role-active' : ''}}"
+        data-role="{{item.id}}"
+        bindtap="selectRole"
+      >
+        <view class="role-name">{{item.name}}</view>
+        <view class="role-desc">{{item.desc}}</view>
+      </view>
+    </view>
+
+    <view class="hint">{{demoHint}}</view>
+
+    <button class="btn-primary login-btn" bindtap="onLogin">进入小程序</button>
+  </view>
+</view>

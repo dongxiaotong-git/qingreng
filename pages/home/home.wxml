@@ -1,0 +1,44 @@
+<view class="page">
+  <view class="header">
+    <view class="header-top">
+      <view class="brand">♻️ 代扔垃圾</view>
+      <view class="role-badge">{{roleLabel}}</view>
+    </view>
+    <view class="header-sub">足不出户，垃圾有人帮扔</view>
+  </view>
+
+  <view class="container">
+    <view class="section-title">选择套餐</view>
+
+    <view
+      wx:for="{{packages}}"
+      wx:key="id"
+      class="pkg card"
+    >
+      <view class="pkg-main">
+        <view class="pkg-name">{{item.name}}</view>
+        <view class="pkg-desc">{{item.desc}}</view>
+        <view class="pkg-price">
+          <text class="price-symbol">¥</text>
+          <text class="price-num">{{item.price}}</text>
+          <text class="price-unit" wx:if="{{item.days > 0}}"> / {{item.days}}天</text>
+        </view>
+      </view>
+      <button
+        class="btn-primary pkg-btn"
+        data-pkg="{{item.id}}"
+        bindtap="goCreate"
+      >立即下单</button>
+    </view>
+
+    <view class="card flow">
+      <view class="section-title">服务流程</view>
+      <view class="steps">
+        <view wx:for="{{steps}}" wx:key="text" class="step">
+          <view class="step-icon">{{item.icon}}</view>
+          <view class="step-text">{{item.text}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

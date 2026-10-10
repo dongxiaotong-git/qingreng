@@ -1,0 +1,57 @@
+<view class="page">
+  <view class="header">
+    <image wx:if="{{user.avatar}}" class="avatar" src="{{user.avatar}}" />
+    <view wx:else class="avatar avatar-default">🐱</view>
+    <view class="user-meta">
+      <view class="nickname">{{user.nickname}}</view>
+      <view class="role-badge">{{roleLabel}}</view>
+      <view wx:if="{{user.phone}}" class="phone">{{user.phone}}</view>
+    </view>
+  </view>
+
+  <view class="container">
+    <!-- 统计（管理员/接单员可见全部，普通用户仅自己的） -->
+    <view class="card stats" wx:if="{{stats}}">
+      <view class="stat">
+        <view class="stat-num">{{stats.total}}</view>
+        <view class="stat-label">全部</view>
+      </view>
+      <view class="stat">
+        <view class="stat-num" style="color:#fa8c16">{{stats.pending}}</view>
+        <view class="stat-label">待处理</view>
+      </view>
+      <view class="stat">
+        <view class="stat-num" style="color:#1677ff">{{stats.accepted}}</view>
+        <view class="stat-label">已接单</view>
+      </view>
+      <view class="stat">
+        <view class="stat-num" style="color:#07c160">{{stats.completed}}</view>
+        <view class="stat-label">已完成</view>
+      </view>
+    </view>
+
+    <view class="card menu">
+      <view class="menu-item" bindtap="goOrders">
+        <text>📋 我的订单</text>
+        <text class="arrow">›</text>
+      </view>
+      <view class="menu-item" wx:if="{{isCourier}}">
+        <text>🛵 接单员身份</text>
+        <text class="arrow">在「订单」页接单</text>
+      </view>
+      <view class="menu-item" wx:if="{{isAdmin}}">
+        <text>🛡️ 管理员身份</text>
+        <text class="arrow">可查看全部订单</text>
+      </view>
+      <view class="menu-item" bindtap="switchAccount">
+        <text>🔄 切换身份 / 退出</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <view class="about">
+      <view class="about-title">代扔垃圾小程序</view>
+      <view class="about-text">足不出户，垃圾有人帮扔。本程序为演示版本，数据存于本地。</view>
+    </view>
+  </view>
+</view>

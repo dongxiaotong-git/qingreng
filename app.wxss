@@ -1,0 +1,83 @@
+/* 全局样式 & 主题 */
+page {
+  --primary: #07c160;
+  --primary-dark: #06a850;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --text-sub: #888888;
+  --border: #ededed;
+  --warn: #fa8c16;
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 28rpx;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+}
+
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 40rpx;
+}
+
+.container {
+  padding: 24rpx;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  margin-bottom: 24rpx;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.btn-primary[disabled] {
+  background: #b8e6c8;
+  color: #fff;
+}
+.btn-ghost {
+  background: #fff;
+  color: var(--primary);
+  border: 2rpx solid var(--primary);
+  border-radius: 48rpx;
+  font-size: 28rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  margin: 8rpx 0 20rpx;
+}
+
+.text-sub {
+  color: var(--text-sub);
+  font-size: 24rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  background: #eafaf0;
+  color: var(--primary);
+}
+
+.divider {
+  height: 2rpx;
+  background: var(--border);
+  margin: 20rpx 0;
+}

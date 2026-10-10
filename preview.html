@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>代扔垃圾小程序 · 界面预览</title>
+<style>
+  :root{
+    --primary:#07c160; --primary-d:#06a850; --bg:#f5f6f8; --card:#fff;
+    --text:#1a1a1a; --sub:#888; --border:#ededed; --warn:#fa541c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;}
+  body{background:#eef1f4;color:var(--text);padding:30px;}
+  h1{font-size:22px;margin-bottom:6px;}
+  .sub{color:var(--sub);font-size:13px;margin-bottom:24px;}
+  .grid{display:flex;flex-wrap:wrap;gap:22px;}
+  .phone{width:300px;background:#fff;border-radius:28px;box-shadow:0 10px 30px rgba(0,0,0,.12);overflow:hidden;border:8px solid #111;}
+  .screen{height:600px;overflow:auto;background:var(--bg);position:relative;}
+  .cap{text-align:center;font-size:13px;font-weight:600;margin-top:8px;color:#333;}
+
+  /* header */
+  .hdr{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;padding:30px 20px 28px;}
+  .hdr .row{display:flex;justify-content:space-between;align-items:center;}
+  .brand{font-size:20px;font-weight:700;}
+  .badge{background:rgba(255,255,255,.22);border-radius:16px;padding:4px 12px;font-size:12px;}
+  .hdr .s{font-size:13px;opacity:.9;margin-top:8px;}
+  .container{padding:16px;}
+  .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:14px;}
+  .sec-t{font-size:15px;font-weight:700;margin:4px 0 12px;}
+  .pkg{display:flex;justify-content:space-between;align-items:center;}
+  .pkg .n{font-weight:700;font-size:15px;}
+  .pkg .d{font-size:12px;color:var(--sub);margin:6px 0;}
+  .price{color:var(--warn);}
+  .price b{font-size:20px;}
+  .btn{background:var(--primary);color:#fff;border:none;border-radius:24px;padding:10px 16px;font-size:13px;font-weight:600;width:100%;}
+  .btn.sm{width:auto;padding:8px 14px;}
+  .flow{display:flex;justify-content:space-between;text-align:center;font-size:12px;color:#666;}
+  .flow .i{font-size:22px;}
+
+  /* form */
+  .frow{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;}
+  .flabel{font-weight:600;}
+  .freq{color:var(--warn);}
+  .fblock{margin-top:14px;font-size:13px;}
+  .ta{background:#f7f8fa;border-radius:10px;padding:10px;font-size:13px;margin-top:8px;color:#555;min-height:46px;}
+  .opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .opt{border:1px solid #e5e5e5;border-radius:8px;padding:8px 12px;font-size:12px;background:#fff;}
+  .opt.on{border-color:var(--primary);background:#eafaf0;color:var(--primary);font-weight:600;}
+  .tip{font-size:12px;color:#b8860b;background:#fff8e6;border-radius:8px;padding:8px;margin-top:8px;line-height:1.5;}
+  .picker{background:#f7f8fa;border-radius:8px;padding:10px;font-size:13px;margin-top:8px;}
+  .imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .img{width:64px;height:64px;border-radius:8px;background:#e6e6e6;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:22px;}
+  .img.add{border:1px dashed #ccc;color:#07c160;}
+
+  /* orders */
+  .filterbar{display:flex;background:#fff;padding:10px 12px;position:sticky;top:0;}
+  .fb{flex:1;text-align:center;font-size:13px;color:#666;}
+  .fb.on{color:var(--primary);font-weight:700;}
+  .order{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .ohead{display:flex;justify-content:space-between;align-items:center;}
+  .ono{font-weight:700;font-size:13px;}
+  .st{font-size:11px;padding:3px 10px;border-radius:12px;}
+  .obody{display:flex;margin-top:8px;}
+  .thumb{width:64px;height:64px;border-radius:8px;background:#e6e6e6;flex-shrink:0;}
+  .oinfo{flex:1;margin-left:10px;font-size:12px;color:#444;}
+  .oinfo .l{display:inline-block;width:34px;color:#999;}
+  .ofoot{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid #f2f2f2;}
+  .ptag{font-size:11px;color:var(--primary);background:#eafaf0;padding:3px 8px;border-radius:10px;}
+  .p{color:var(--warn);font-weight:700;}
+
+  /* detail */
+  .banner{border:1px solid;border-radius:14px;padding:16px;margin-bottom:12px;}
+  .kv{display:flex;padding:7px 0;font-size:13px;}
+  .k{width:64px;color:#999;flex-shrink:0;}
+  .v{flex:1;color:#333;}
+  .action{border:1px solid var(--primary);}
+  .proof{width:100%;height:160px;border-radius:8px;background:#e6e6e6;margin-top:6px;display:flex;align-items:center;justify-content:center;color:#aaa;}
+
+  /* profile */
+  .ph{display:flex;align-items:center;color:#fff;}
+  .ava{width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;}
+  .pm{margin-left:14px;}
+  .pn{font-size:16px;font-weight:700;}
+  .stats{display:flex;justify-content:space-around;text-align:center;}
+  .sn{font-size:20px;font-weight:700;}
+  .sl{font-size:11px;color:#999;margin-top:4px;}
+  .menu{padding:0 16px;}
+  .mi{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f2f2f2;font-size:13px;}
+  .mi:last-child{border:none;}
+  .arr{color:#bbb;}
+</style>
+</head>
+<body>
+<h1>代扔垃圾小程序 · 界面预览</h1>
+<div class="sub">基于需求文档实现的 UI 草稿（绿色主题 #07c160）。原 UI 初稿链接需登录态渲染，此处为按需求自绘的可视化预览。若需像素级对齐，请贴出设计稿截图。</div>
+<div class="grid">
+
+  <!-- 首页 -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="hdr">
+        <div class="row"><div class="brand">♻️ 代扔垃圾</div><div class="badge">普通用户</div></div>
+        <div class="s">足不出户，垃圾有人帮扔</div>
+      </div>
+      <div class="container">
+        <div class="sec-t">选择套餐</div>
+        <div class="card"><div class="pkg"><div><div class="n">单次代扔</div><div class="d">单次上门，生活/大件均可</div></div><div class="price">¥<b>15</b></div></div><button class="btn sm" style="margin-top:8px">立即下单</button></div>
+        <div class="card"><div class="pkg"><div><div class="n">包周套餐</div><div class="d">7 天不限次（不含大件）</div></div><div class="price">¥<b>68</b></div></div><button class="btn sm" style="margin-top:8px">立即下单</button></div>
+        <div class="card"><div class="pkg"><div><div class="n">包月套餐</div><div class="d">30 天不限次（不含大件）</div></div><div class="price">¥<b>228</b></div></div><button class="btn sm" style="margin-top:8px">立即下单</button></div>
+        <div class="card"><div class="sec-t">服务流程</div><div class="flow"><div><div class="i">📝</div>线上下单</div><div><div class="i">📷</div>门口放袋</div><div><div class="i">🛵</div>专人代扔</div><div><div class="i">✅</div>拍照确认</div></div></div>
+      </div>
+    </div></div>
+    <div class="cap">① 首页 · 套餐选择</div>
+  </div>
+
+  <!-- 创建订单 -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="hdr"><div class="row"><div class="brand" style="font-size:16px">创建订单</div></div><div class="s">单次代扔 · ¥15</div></div>
+      <div class="container">
+        <div class="card">
+          <div class="sec-t">填写订单</div>
+          <div class="frow"><span class="flabel">订单号</span><span style="color:var(--primary);font-weight:700">20261011001</span></div>
+          <div class="fblock"><span class="flabel">地址 <span class="freq">*</span></span><div class="ta">阳光小区 3 栋 2 单元 502</div></div>
+          <div class="fblock"><span class="flabel">垃圾类型 <span class="freq">*</span></span><div class="opts"><div class="opt on">生活垃圾</div><div class="opt">大件垃圾</div></div><div class="tip">💡 温馨提示：请将垃圾袋（不超过 5 袋）放在门口即可，工作人员会按约定时间上门取走。</div></div>
+          <div class="fblock"><span class="flabel">日期 <span class="freq">*</span></span><div class="picker">2026-10-11 ▾</div></div>
+          <div class="fblock"><span class="flabel">时间段 <span class="freq">*</span></span><div class="opts"><div class="opt">早上 6:00-8:00</div><div class="opt on">晚上 20:00-24:00</div></div></div>
+          <div class="fblock"><span class="flabel">垃圾图片 <span class="freq">*</span></span><div class="imgs"><div class="img">🗑️</div><div class="img add">＋</div></div></div>
+          <div class="fblock"><span class="flabel">备注</span><div class="ta" style="color:#999">门口鞋柜旁（选填）</div></div>
+        </div>
+        <button class="btn">微信支付并下单</button>
+      </div>
+    </div></div>
+    <div class="cap">② 创建订单 · 表单</div>
+  </div>
+
+  <!-- 订单列表 -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="filterbar"><div class="fb on">全部</div><div class="fb">待处理</div><div class="fb">已接单</div><div class="fb">已完成</div></div>
+      <div class="container">
+        <div class="order"><div class="ohead"><span class="ono">No.20261011001</span><span class="st" style="color:#fa8c16;background:#fa8c161a">待处理</span></div><div class="obody"><div class="thumb"></div><div class="oinfo"><div><span class="l">类型</span>生活垃圾</div><div><span class="l">地址</span>阳光小区3栋502</div><div><span class="l">时间</span>2026-10-11 晚上</div></div></div><div class="ofoot"><span class="ptag">单次代扔</span><span class="p">¥15</span></div></div>
+        <div class="order"><div class="ohead"><span class="ono">No.20261010003</span><span class="st" style="color:#1677ff;background:#1677ff1a">已接单</span></div><div class="obody"><div class="thumb"></div><div class="oinfo"><div><span class="l">类型</span>大件垃圾</div><div><span class="l">地址</span>江景苑8栋1101</div><div><span class="l">时间</span>2026-10-10 早上</div></div></div><div class="ofoot"><span class="ptag">单次代扔</span><span class="p">¥15</span></div></div>
+        <div class="order"><div class="ohead"><span class="ono">No.20261009001</span><span class="st" style="color:#07c160;background:#07c1601a">已完成</span></div><div class="obody"><div class="thumb"></div><div class="oinfo"><div><span class="l">类型</span>生活垃圾</div><div><span class="l">地址</span>和平路12号</div><div><span class="l">时间</span>2026-10-09 晚上</div></div></div><div class="ofoot"><span class="ptag">包周套餐</span><span class="p">¥68</span></div></div>
+      </div>
+    </div></div>
+    <div class="cap">③ 订单 · 列表与状态</div>
+  </div>
+
+  <!-- 订单详情 + 接单 -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="container">
+        <div class="banner" style="border-color:#fa8c16;background:#fa8c161a"><div style="font-size:18px;font-weight:700;color:#fa8c16">待处理</div><div style="font-size:12px;color:#666;margin-top:4px">订单号 No.20261011001</div></div>
+        <div class="card"><div class="sec-t">订单信息</div><div class="kv"><span class="k">套餐</span><span class="v">单次代扔（¥15）</span></div><div class="kv"><span class="k">类型</span><span class="v">生活垃圾</span></div><div class="kv"><span class="k">地址</span><span class="v">阳光小区 3 栋 502</span></div><div class="kv"><span class="k">日期</span><span class="v">2026-10-11</span></div><div class="kv"><span class="k">时间段</span><span class="v">晚上 20:00-24:00</span></div></div>
+        <div class="card"><div class="sec-t">垃圾图片</div><div class="imgs"><div class="img">🗑️</div><div class="img">🛍️</div></div></div>
+        <div class="card action"><div class="sec-t">接单操作</div><div class="tip">⚠️ 确认接单前必须上传现场拍照，否则无法接单。</div><div class="imgs" style="margin-top:8px"><div class="img add">＋ 接单拍照</div></div><button class="btn" style="margin-top:10px">确认接单</button></div>
+      </div>
+    </div></div>
+    <div class="cap">④ 订单详情 · 接单员接单</div>
+  </div>
+
+  <!-- 我的 -->
+  <div>
+    <div class="phone"><div class="screen">
+      <div class="hdr"><div class="ph"><div class="ava">🐱</div><div class="pm"><div class="pn">微信用户</div><div class="badge" style="margin-top:6px">普通用户</div></div></div></div>
+      <div class="container">
+        <div class="card stats"><div><div class="sn">5</div><div class="sl">全部</div></div><div><div class="sn" style="color:#fa8c16">2</div><div class="sl">待处理</div></div><div><div class="sn" style="color:#1677ff">1</div><div class="sl">已接单</div></div><div><div class="sn" style="color:#07c160">2</div><div class="sl">已完成</div></div></div>
+        <div class="card menu">
+          <div class="mi"><span>📋 我的订单</span><span class="arr">›</span></div>
+          <div class="mi"><span>🔄 切换身份 / 退出</span><span class="arr">›</span></div>
+        </div>
+        <div style="text-align:center;padding:30px 0;color:#aaa;font-size:12px">代扔垃圾小程序<br/>足不出户，垃圾有人帮扔</div>
+      </div>
+    </div></div>
+    <div class="cap">⑤ 我的 · 信息与统计</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<view class="page">
+  <view class="filter-bar">
+    <view
+      wx:for="{{filters}}"
+      wx:key="id"
+      class="filter {{statusFilter === item.id ? 'filter-active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onFilter"
+    >{{item.name}}</view>
+  </view>
+
+  <view class="container">
+    <view wx:if="{{list.length === 0}}" class="empty">
+      <view class="empty-icon">🗒️</view>
+      <view class="empty-text">暂无订单</view>
+    </view>
+
+    <view
+      wx:for="{{list}}"
+      wx:key="_id"
+      class="order-card card"
+      data-id="{{item._id}}"
+      bindtap="goDetail"
+    >
+      <view class="order-head">
+        <text class="order-no">No.{{item.orderNo}}</text>
+        <text class="status" style="color:{{item.statusColor}};background:{{item.statusBg}}">{{item.statusText}}</text>
+      </view>
+      <view class="order-body">
+        <image wx:if="{{item.images.length > 0}}" class="thumb" src="{{item.images[0]}}" mode="aspectFill" />
+        <view class="order-info">
+          <view class="info-line"><text class="info-label">类型</text>{{item.trashTypeName}}</view>
+          <view class="info-line"><text class="info-label">地址</text>{{item.address}}</view>
+          <view class="info-line"><text class="info-label">时间</text>{{item.date}} {{item.timeSlotName}}</view>
+        </view>
+      </view>
+      <view class="order-foot">
+        <text class="pkg-tag">{{item.packageName}}</text>
+        <text class="price">¥{{item.price}}</text>
+      </view>
+    </view>
+  </view>
+</view>

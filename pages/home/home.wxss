@@ -1,0 +1,81 @@
+.header {
+  background: linear-gradient(135deg, #07c160, #06a850);
+  padding: 40rpx 48rpx 60rpx;
+  color: #fff;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+.role-badge {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 30rpx;
+  padding: 8rpx 24rpx;
+  font-size: 24rpx;
+}
+.header-sub {
+  font-size: 26rpx;
+  opacity: 0.9;
+  margin-top: 14rpx;
+}
+
+.pkg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pkg-main {
+  flex: 1;
+}
+.pkg-name {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.pkg-desc {
+  font-size: 24rpx;
+  color: #888;
+  margin: 10rpx 0 16rpx;
+}
+.pkg-price {
+  color: #fa541c;
+}
+.price-symbol {
+  font-size: 24rpx;
+}
+.price-num {
+  font-size: 44rpx;
+  font-weight: 700;
+}
+.price-unit {
+  font-size: 24rpx;
+  color: #999;
+}
+.pkg-btn {
+  width: 180rpx;
+  margin: 0;
+  padding: 0 10rpx;
+  line-height: 72rpx;
+  height: 72rpx;
+}
+
+.flow .steps {
+  display: flex;
+  justify-content: space-between;
+}
+.step {
+  flex: 1;
+  text-align: center;
+}
+.step-icon {
+  font-size: 48rpx;
+}
+.step-text {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}

@@ -1,0 +1,104 @@
+.filter-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  background: #fff;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.03);
+}
+.filter {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  padding: 12rpx 0;
+}
+.filter-active {
+  color: #07c160;
+  font-weight: 700;
+}
+
+.empty {
+  text-align: center;
+  padding: 140rpx 0;
+  color: #999;
+}
+.empty-icon {
+  font-size: 90rpx;
+}
+.empty-text {
+  margin-top: 20rpx;
+  font-size: 28rpx;
+}
+
+.order-card {
+  padding: 24rpx;
+}
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.order-no {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #333;
+}
+.status {
+  font-size: 24rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+}
+
+.order-body {
+  display: flex;
+  margin-top: 18rpx;
+}
+.thumb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  background: #f0f0f0;
+}
+.order-info {
+  flex: 1;
+  margin-left: 20rpx;
+  overflow: hidden;
+}
+.info-line {
+  font-size: 26rpx;
+  color: #444;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.info-label {
+  display: inline-block;
+  width: 70rpx;
+  color: #999;
+  font-size: 24rpx;
+}
+
+.order-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 2rpx solid #f2f2f2;
+}
+.pkg-tag {
+  font-size: 24rpx;
+  color: #07c160;
+  background: #eafaf0;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+.price {
+  font-size: 30rpx;
+  color: #fa541c;
+  font-weight: 700;
+}

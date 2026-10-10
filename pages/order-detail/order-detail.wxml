@@ -1,0 +1,80 @@
+<view class="page" wx:if="{{order}}">
+  <view class="container">
+    <!-- 状态横幅 -->
+    <view class="banner" style="background:{{order.statusBg}};border-color:{{order.statusColor}}">
+      <view class="banner-status" style="color:{{order.statusColor}}">{{order.statusText}}</view>
+      <view class="banner-no">订单号 No.{{order.orderNo}}</view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="card">
+      <view class="section-title">订单信息</view>
+      <view class="kv"><text class="k">套餐</text><text class="v">{{order.packageName}}（¥{{order.price}}）</text></view>
+      <view class="kv"><text class="k">垃圾类型</text><text class="v">{{order.trashTypeName}}</text></view>
+      <view class="kv"><text class="k">地址</text><text class="v">{{order.address}}</text></view>
+      <view class="kv"><text class="k">日期</text><text class="v">{{order.date}}</text></view>
+      <view class="kv"><text class="k">时间段</text><text class="v">{{order.timeSlotName}}</text></view>
+      <view class="kv" wx:if="{{order.remark}}"><text class="k">备注</text><text class="v">{{order.remark}}</text></view>
+    </view>
+
+    <!-- 垃圾图片 -->
+    <view class="card">
+      <view class="section-title">垃圾图片</view>
+      <view class="img-grid">
+        <image
+          wx:for="{{order.images}}"
+          wx:key="*this"
+          class="img"
+          src="{{item}}"
+          mode="aspectFill"
+          data-urls="{{order.images}}"
+          data-url="{{item}}"
+          bindtap="preview"
+        />
+      </view>
+    </view>
+
+    <!-- 接单信息 -->
+    <view class="card" wx:if="{{order.courierName}}">
+      <view class="section-title">接单信息</view>
+      <view class="kv"><text class="k">接单员</text><text class="v">{{order.courierName}}</text></view>
+      <view class="kv"><text class="k">接单时间</text><text class="v">{{order.acceptTimeText}}</text></view>
+      <view class="sub-title">接单拍照</view>
+      <image wx:if="{{order.acceptPhoto}}" class="proof" src="{{order.acceptPhoto}}" mode="aspectFill" data-urls="{{[order.acceptPhoto]}}" data-url="{{order.acceptPhoto}}" bindtap="preview" />
+    </view>
+
+    <!-- 完成信息 -->
+    <view class="card" wx:if="{{order.status === 'completed'}}">
+      <view class="section-title">完成信息</view>
+      <view class="kv"><text class="k">完成时间</text><text class="v">{{order.completeTimeText}}</text></view>
+      <view class="sub-title">完成拍照</view>
+      <image wx:if="{{order.completePhoto}}" class="proof" src="{{order.completePhoto}}" mode="aspectFill" data-urls="{{[order.completePhoto]}}" data-url="{{order.completePhoto}}" bindtap="preview" />
+    </view>
+
+    <!-- 接单员操作：接单 -->
+    <view class="card action-card" wx:if="{{showAccept}}">
+      <view class="section-title">接单操作</view>
+      <view class="tip">⚠️ 确认接单前必须上传现场拍照，否则无法接单。</view>
+      <view class="img-grid" style="margin-top:16rpx;">
+        <view wx:if="{{acceptPhoto}}" class="img-item">
+          <image class="img" src="{{acceptPhoto}}" mode="aspectFill" data-urls="{{[acceptPhoto]}}" data-url="{{acceptPhoto}}" bindtap="preview" />
+        </view>
+        <view wx:if="{{!acceptPhoto}}" class="img-add" bindtap="chooseAcceptPhoto">＋ 接单拍照</view>
+      </view>
+      <button class="btn-primary action-btn" bindtap="onAccept" disabled="{{processing}}">确认接单</button>
+    </view>
+
+    <!-- 接单员操作：完成 -->
+    <view class="card action-card" wx:if="{{showComplete}}">
+      <view class="section-title">完成操作</view>
+      <view class="tip">⚠️ 处理完成后必须再次上传拍照，否则无法标记完成。</view>
+      <view class="img-grid" style="margin-top:16rpx;">
+        <view wx:if="{{completePhoto}}" class="img-item">
+          <image class="img" src="{{completePhoto}}" mode="aspectFill" data-urls="{{[completePhoto]}}" data-url="{{completePhoto}}" bindtap="preview" />
+        </view>
+        <view wx:if="{{!completePhoto}}" class="img-add" bindtap="chooseCompletePhoto">＋ 完成拍照</view>
+      </view>
+      <button class="btn-primary action-btn" bindtap="onComplete" disabled="{{processing}}">标记已完成</button>
+    </view>
+  </view>
+</view>
