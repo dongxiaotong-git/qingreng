@@ -24,8 +24,13 @@
 1. 在微信开发者工具中开通「云开发」，拿到**环境 ID**。
 2. 把 `utils/config.js` 改为 `USE_CLOUD = true`，并填写 `CLOUD_ENV = '你的环境ID'`。
 3. 在云开发控制台创建数据库集合：**`orders`**、**`users`**（orders 建议加索引 `orderNo`、`status`、`openid`）。
-4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 8 个云函数：
-   `login` / `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder`。
+4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 9 个云函数：
+   `login` / `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`。
+
+   > **登录流程（标准微信登录）**：客户端 `api.login` 先调 `wx.login()` 拿到 `code`，再调用云函数 `wxLogin`；云函数用
+   > `https://api.weixin.qq.com/sns/jscode2session` 以 `code` 换取 `openid` / `session_key`，再据此创建或更新 `users` 记录并返回用户信息。
+   >
+   > ⚠️ `jscode2session` **必须在服务端调用**，不能放在小程序客户端（否则 `AppSecret` 会泄露）。请在小程序后台「开发管理 → 开发设置」拿到 AppID 和 AppSecret，并配置到 `wxLogin` 云函数的**环境变量** `WX_APPID` / `WX_SECRET`（不要在源码里硬编码）。
 5. 真机/体验版中，微信支付需配合商户号并在 `create-order.js` 的 `mockPay` 处替换为 `wx.requestPayment`（由云函数统一下单返回 `prepay_id`）。
 
 ## 三、如何导入运行

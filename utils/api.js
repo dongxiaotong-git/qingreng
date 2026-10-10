@@ -55,9 +55,20 @@ function persistImage(tempPath) {
 // 登录/注册：根据手机号判断角色（演示账号见 config.DEMO_ACCOUNTS）
 function login({ phone, role, nickname, avatar }) {
   if (USE_CLOUD) {
-    return callCloud('login', { phone, role, nickname, avatar }).then(user => {
-      wx.setStorageSync(KEY_USER, user);
-      return user;
+    // 标准微信登录：先 wx.login() 拿 code，再让云函数用 jscode2session 换 openid
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success: res => {
+          if (!res.code) return reject(new Error('获取微信登录 code 失败'));
+          callCloud('wxLogin', { code: res.code, phone, role, nickname, avatar })
+            .then(user => {
+              wx.setStorageSync(KEY_USER, user);
+              resolve(user);
+            })
+            .catch(reject);
+        },
+        fail: err => reject(err)
+      });
     });
   }
   return new Promise((resolve) => {
