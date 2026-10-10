@@ -27,29 +27,38 @@
       />
     </view>
 
-    <!-- 手机号：手动输入兜底 + 微信授权（企业主体） -->
+    <!-- 手机号：仅通过微信授权自动获取，不支持手动输入 -->
     <view class="field">
-      <text class="label">手机号（选填，用于识别角色）</text>
-      <view class="phone-row">
-        <input
-          class="input phone-input"
-          type="number"
-          maxlength="11"
-          placeholder="手动输入"
-          value="{{phone}}"
-          bindinput="onInputPhone"
-        />
-        <button
-          class="btn-ghost phone-btn {{phoneAuthorized ? 'phone-btn-ok' : ''}}"
-          open-type="getPhoneNumber"
-          bindgetphonenumber="onGetPhoneNumber"
-        >{{phoneAuthorized ? '已授权' : '微信授权'}}</button>
+      <text class="label">手机号</text>
+      <view class="phone-box {{phone ? 'phone-box-ok' : ''}}">
+        <text wx:if="{{phone}}" class="phone-text">{{phone}}</text>
+        <text wx:else class="phone-placeholder">点击下方按钮，自动获取微信绑定手机号</text>
       </view>
-      <view wx:if="{{phoneAuthorized}}" class="tip">已获得授权，点击登录时自动解密真实手机号</view>
+      <view wx:if="{{phone}}" class="tip">✓ 已通过微信授权获取</view>
+    </view>
+
+    <view class="label">选择身份</view>
+    <view class="roles">
+      <view
+        wx:for="{{roles}}"
+        wx:key="id"
+        class="role {{selectedRole === item.id ? 'role-active' : ''}}"
+        data-role="{{item.id}}"
+        bindtap="selectRole"
+      >
+        <view class="role-name">{{item.name}}</view>
+        <view class="role-desc">{{item.desc}}</view>
+      </view>
     </view>
 
     <view class="hint">{{demoHint}}</view>
 
-    <button class="btn-primary login-btn" bindtap="onLogin">登录</button>
+    <!-- 登录按钮即手机号授权按钮：点一次 = 授权手机号 + wx.login 登录 -->
+    <button
+      class="btn-primary login-btn"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="onLogin"
+      loading="{{loading}}"
+    >微信一键登录</button>
   </view>
 </view>

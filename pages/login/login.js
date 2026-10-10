@@ -1,20 +1,21 @@
 const app = getApp();
 const api = require('../../utils/api');
+const { USE_CLOUD } = require('../../utils/config');
 
 Page({
   data: {
     avatar: '',
     nickname: '',
-    phone: '',
-    phoneCode: '',
-    phoneAuthorized: false, // 是否已用微信授权手机号
+    phone: '',        // 仅展示用：来自上次登录回填或本次授权解密结果
+    phoneCode: '',    // 本次授权拿到的手机号 code
     selectedRole: 'user',
+    loading: false,
     roles: [
       { id: 'user', name: '普通用户', desc: '下单查看' },
       { id: 'courier', name: '接单员', desc: '接单/完成' },
       { id: 'admin', name: '管理员', desc: '查看全部' }
     ],
-    demoHint: '演示：手机号 13800000001 为接单员、13800000000 为管理员；也可直接选身份体验。'
+    demoHint: '手机号由微信授权自动获取，不会手动输入；身份仅在演示环境手动选择，正式环境应由后台按手机号配置。'
   },
 
   onLoad() {
@@ -41,55 +42,66 @@ Page({
     this.setData({ nickname: e.detail.value || e.detail.nickName || '' });
   },
 
-  onInputPhone(e) {
-    this.setData({ phone: e.detail.value, phoneAuthorized: false, phoneCode: '' });
-  },
-
-  // 微信手机号授权（需企业/非个人主体小程序，个人主体会失败，可走手动输入）
-  onGetPhoneNumber(e) {
-    const { code, errMsg } = e.detail;
-    if (!code || (errMsg && errMsg.indexOf('ok') === -1)) {
-      wx.showToast({ title: '未授权手机号，可手动输入', icon: 'none' });
-      return;
-    }
-    // code 不能直接换手机号，需连同 wx.login 的 code 一起交给云函数解密
-    this.setData({ phoneCode: code, phoneAuthorized: true });
-    wx.showToast({ title: '已授权，登录后自动获取', icon: 'none' });
-  },
-
   selectRole(e) {
     this.setData({ selectedRole: e.currentTarget.dataset.role });
   },
 
-  onLogin() {
+  /**
+   * 登录：本按钮 open-type="getPhoneNumber"，点击即同时触发手机号授权。
+   * 拿到 phoneCode 后立刻 wx.login() 拿 code，两者一起交给云函数。
+   */
+  onLogin(e) {
+    if (this.data.loading) return;
+
+    const detail = (e && e.detail) || {};
+    const code = detail.code;
+    const errMsg = detail.errMsg || '';
+    const authorized = !!code && errMsg.indexOf('ok') !== -1;
+
+    if (!authorized) {
+      // 云模式：手机号是必填，拿不到就阻断并提示重新授权
+      if (USE_CLOUD) {
+        wx.showToast({ title: '请先授权手机号', icon: 'none' });
+        return;
+      }
+      // 演示模式（无真实 AppID）无法授权，降级放行以便继续体验
+      wx.showToast({ title: '演示模式：跳过手机号', icon: 'none' });
+      this.doLogin('');
+      return;
+    }
+
+    this.setData({ phoneCode: code });
+    this.doLogin(code);
+  },
+
+  doLogin(phoneCode) {
     const d = this.data;
+    this.setData({ loading: true });
     wx.showLoading({ title: '登录中...', mask: true });
+
     api.login({
       phone: d.phone,
-      phoneCode: d.phoneCode,
+      phoneCode: phoneCode,
       role: d.selectedRole,
       nickname: d.nickname,
       avatar: d.avatar
     })
       .then(user => {
         wx.hideLoading();
+        this.setData({ loading: false });
         app.globalData.user = user;
-        // 云函数解密手机号后回填
         if (user.phone) {
-          this.setData({ phone: user.phone, phoneAuthorized: !!user.phoneFromWx });
+          this.setData({ phone: user.phone });
         }
-        if (user.phoneWarn) {
-          wx.showToast({ title: '手机号未解密，已用输入值', icon: 'none', duration: 2000 });
-        } else {
-          wx.showToast({ title: '登录成功', icon: 'success' });
-        }
+        wx.showToast({ title: '登录成功', icon: 'success' });
         setTimeout(() => {
           wx.reLaunch({ url: '/pages/home/home' });
         }, 600);
       })
       .catch(err => {
         wx.hideLoading();
-        wx.showToast({ title: err.message || '登录失败', icon: 'none' });
+        this.setData({ loading: false });
+        wx.showToast({ title: err.message || '登录失败', icon: 'none', duration: 2500 });
       });
   }
 });

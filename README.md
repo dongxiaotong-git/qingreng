@@ -27,16 +27,19 @@
 4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 8 个云函数：
    `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`（旧的 `login` 已被 `wxLogin` 取代，不再需要）。
 
-   > **登录流程（标准微信登录）**：
-   > 1. 用户在登录页点头像（`open-type="chooseAvatar"`）选头像、填昵称（`type="nickname"`）、点「微信授权」拿手机号授权 `code`；
-   > 2. 点「登录」→ `api.login()` 先调 `wx.login()` 拿到登录 `code`，并把 `code` + `phoneCode` + 昵称/头像一起传给云函数 `wxLogin`；
-   > 3. 云函数用 `jscode2session` 换 `openid` / `session_key`；
-   > 4. 若传了 `phoneCode`，云函数再拿 `access_token` 调 `https://api.weixin.qq.com/wxa/business/getuserphonenumber` 解密真实手机号（个人主体无此权限，会自动回退到手动输入的手机号，不阻断登录）；
-   > 5. 按 `openid` 创建或更新 `users` 记录，返回用户信息（**不含 `sessionKey`**）。
+   > **登录流程（标准微信登录，手机号全自动授权）**：
+   > 1. 登录页点头像（`open-type="chooseAvatar"`）选头像、填昵称（`type="nickname"`）；**手机号不提供手动输入**；
+   > 2. 「微信一键登录」按钮本身就是 `open-type="getPhoneNumber"` —— 点一次同时触发手机号授权，回调里拿到 `phoneCode`；
+   > 3. 随后 `api.login()` 调 `wx.login()` 拿登录 `code`，把 `code` + `phoneCode` + 昵称/头像一起传给云函数 `wxLogin`；
+   > 4. 云函数用 `jscode2session` 换 `openid` / `session_key`；
+   > 5. 云函数拿 `access_token` 调 `https://api.weixin.qq.com/wxa/business/getuserphonenumber` 解密真实手机号；
+   > 6. 按 `openid` 创建或更新 `users` 记录，返回用户信息（**不含 `sessionKey`**）。
    >
    > ⚠️ `jscode2session` **必须在服务端调用**，不能放在小程序客户端（否则 `AppSecret` 会泄露）。请在小程序后台「开发管理 → 开发设置」拿到 AppID 和 AppSecret，并配置到 `wxLogin` 云函数的**环境变量** `WX_APPID` / `WX_SECRET`（不要在源码里硬编码）。
    >
    > 📌 头像来自 `chooseAvatar` 的**临时路径**，直接存会在重启后失效：本地模式会 `saveFile` 持久化，云模式会上传到云存储换 `fileID`，逻辑见 `utils/api.js` 的 `persistAvatar`。
+   >
+   > ❗ **手机号是必填项**：云函数只认 `phoneCode` 解密的结果，不再接受客户端传来的 `phone`。解密失败（常见原因：个人主体小程序没有 `getuserphonenumber` 权限、`phoneCode` 已用过一次）会直接抛错并由前端提示重新授权，**不会静默降级**。
 5. 真机/体验版中，微信支付需配合商户号并在 `create-order.js` 的 `mockPay` 处替换为 `wx.requestPayment`（由云函数统一下单返回 `prepay_id`）。
 
 ## 三、如何导入运行
@@ -47,15 +50,17 @@
 
 ## 四、三种角色与体验入口
 
-登录页提供「身份快速选择」（Demo 便捷入口，生产应按手机号自动识别）：
+登录页提供「身份快速选择」（Demo 便捷入口，**生产应由后台按真实手机号配置角色**，而不是让用户在客户端自选）：
 
-| 角色 | 权限 | 演示手机号 |
-|------|------|-----------|
-| 普通用户 | 下单、查看自己的订单 | 任意手机号（默认） |
-| 接单员 | 接单 / 完成订单（需拍照） | `13800000001` |
-| 管理员 | 查看全部订单 | `13800000000` |
+| 角色 | 权限 |
+|------|------|
+| 普通用户 | 下单、查看自己的订单 |
+| 接单员 | 接单 / 完成订单（需拍照） |
+| 管理员 | 查看全部订单 |
 
 > 接单端与普通用户端是同一个 App，靠登录角色区分。在「我的 → 切换身份」可一键切换体验三种角色。
+>
+> 注：`utils/config.js` 里的 `DEMO_ACCOUNTS`（`13800000000` → 管理员、`13800000001` → 接单员）是早期手动输入手机号时的调试映射。手机号改为微信授权获取后，真实号码不会命中这两个值，该映射仅在本地演示模式（`USE_CLOUD=false`）下生效。
 
 ## 五、功能与需求文档对照
 

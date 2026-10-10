@@ -115,7 +115,8 @@ async function getUserPhoneNumber(phoneCode) {
 
 /* ------------------------------- 主流程 ------------------------------- */
 exports.main = async (event) => {
-  const { code, phone, phoneCode, role, nickname, avatar } = event;
+  // 注意：不再接受客户端传来的 phone，手机号一律由 phoneCode 服务端解密得到
+  const { code, phoneCode, role, nickname, avatar } = event;
   if (!code) throw new Error('缺少登录 code');
   if (APPID === 'YOUR_APPID' || SECRET === 'YOUR_SECRET') {
     throw new Error('请先在云函数环境变量配置 WX_APPID / WX_SECRET');
@@ -125,22 +126,24 @@ exports.main = async (event) => {
   const session = await jscode2session(code);
   const openid = session.openid;
 
-  // 2) 手机号：优先用微信授权解密，失败（如个人主体）则回退到手动输入
-  let finalPhone = phone || '';
+  // 2) 手机号：只认微信授权解密的结果，不支持手动输入
+  let finalPhone = '';
   let phoneFromWx = false;
-  let phoneWarn = '';
-  if (phoneCode) {
-    try {
-      const p = await getUserPhoneNumber(phoneCode);
-      if (p.phone) {
-        finalPhone = p.phone;
-        phoneFromWx = true;
-      }
-    } catch (e) {
-      // 个人主体小程序无权限调用，保留手动输入的手机号，不阻断登录
-      phoneWarn = e.message || '手机号解密失败';
-      console.warn('getuserphonenumber failed:', phoneWarn);
+  if (!phoneCode) {
+    throw new Error('缺少手机号授权 code，请重新授权手机号后登录');
+  }
+  try {
+    const p = await getUserPhoneNumber(phoneCode);
+    if (!p.phone) {
+      throw new Error('微信未返回手机号');
     }
+    finalPhone = p.phone;
+    phoneFromWx = true;
+  } catch (e) {
+    // 手机号是必填项：解密失败直接抛出，由前端提示用户重新授权
+    // 常见原因：个人主体小程序无 getuserphonenumber 权限 / code 已过期（一次性）
+    console.error('getuserphonenumber failed:', e.message);
+    throw new Error(`获取手机号失败：${e.message}`);
   }
 
   // 3) 角色：演示手机号优先，否则沿用客户端所选
@@ -178,7 +181,6 @@ exports.main = async (event) => {
     nickname: payload.nickname,
     avatar: payload.avatar,
     role: payload.role,
-    phoneFromWx,
-    phoneWarn
+    phoneFromWx
   };
 };
