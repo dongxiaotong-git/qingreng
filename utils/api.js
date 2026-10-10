@@ -6,7 +6,7 @@
  *
  * 所有方法均返回 Promise，便于页面统一处理。
  */
-const { USE_CLOUD, CLOUD_ENV, DEMO_ACCOUNTS } = require('./config');
+const { USE_CLOUD } = require('./config');
 const util = require('./util');
 
 const KEY_USER = 'td_user';
@@ -77,13 +77,14 @@ function persistAvatar(tempPath) {
 
 /**
  * 登录/注册
- * @param {string} phone    手动输入的手机号（微信授权失败时的兜底）
- * @param {string} phoneCode <button open-type="getPhoneNumber"> 拿到的授权 code
- * @param {string} role     客户端选择的身份：user | courier | admin
- * @param {string} nickname 微信昵称填写能力拿到的昵称
- * @param {string} avatar   微信头像填写能力拿到的临时路径
+ * @param {string} phoneCode     <button open-type="getPhoneNumber"> 拿到的授权 code（基础库 2.21.2+）
+ * @param {string} encryptedData 旧版基础库返回的加密数据，与 iv 配对使用
+ * @param {string} iv            旧版基础库返回的解密向量
+ * @param {string} nickname      微信昵称填写能力拿到的昵称
+ * @param {string} avatar        微信头像填写能力拿到的临时路径
+ * 手机号与角色均由服务端解密/判定，客户端不再传入。
  */
-function login({ phone, phoneCode, role, nickname, avatar }) {
+function login({ phoneCode, encryptedData, iv, nickname, avatar }) {
   return persistAvatar(avatar).then((savedAvatar) => {
     if (USE_CLOUD) {
       // 标准微信登录：先 wx.login() 拿 code，再让云函数用 jscode2session 换 openid；
@@ -94,9 +95,10 @@ function login({ phone, phoneCode, role, nickname, avatar }) {
             if (!res.code) return reject(new Error('获取微信登录 code 失败'));
             callCloud('wxLogin', {
               code: res.code,
-              phone,
               phoneCode: phoneCode || '',
-              role,
+              // 基础库 < 2.21.2 时微信返回 encryptedData + iv 而非 code，一并带上
+              encryptedData: encryptedData || '',
+              iv: iv || '',
               nickname,
               avatar: savedAvatar
             })
@@ -111,16 +113,15 @@ function login({ phone, phoneCode, role, nickname, avatar }) {
       });
     }
     return new Promise((resolve) => {
-      // 本地演示：优先使用登录页主动选择的身份；若手机号命中演示账号则覆盖。
-      let finalRole = 'user';
-      if (phone && DEMO_ACCOUNTS[phone]) finalRole = DEMO_ACCOUNTS[phone];
-      else if (role) finalRole = role;
+      // 本地演示模式没有服务端，解不出手机号明文。
+      // 保留上次登录的角色/手机号，避免被覆盖重置（角色可在「我的」页切换）。
+      const prev = wx.getStorageSync(KEY_USER) || {};
       const user = {
-        openid: 'local_' + (phone || 'demo'),
-        phone: phone || '',
-        nickname: nickname || '微信用户',
-        avatar: savedAvatar || '',
-        role: finalRole
+        openid: prev.openid || ('local_' + Date.now()),
+        phone: prev.phone || '',
+        nickname: nickname || prev.nickname || '微信用户',
+        avatar: savedAvatar || prev.avatar || '',
+        role: prev.role || 'user'
       };
       wx.setStorageSync(KEY_USER, user);
       resolve(user);

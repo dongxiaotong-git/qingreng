@@ -27,16 +27,6 @@
       />
     </view>
 
-    <!-- 手机号：仅通过微信授权自动获取，不支持手动输入 -->
-    <view class="field">
-      <text class="label">手机号</text>
-      <view class="phone-box {{phone ? 'phone-box-ok' : ''}}">
-        <text wx:if="{{phone}}" class="phone-text">{{phone}}</text>
-        <text wx:else class="phone-placeholder">点击下方按钮，自动获取微信绑定手机号</text>
-      </view>
-      <view wx:if="{{phone}}" class="tip">✓ 已通过微信授权获取</view>
-    </view>
-
     <!-- 登录按钮即手机号授权按钮：点一次 = 授权手机号 + wx.login 登录 -->
     <button
       class="btn-primary login-btn"

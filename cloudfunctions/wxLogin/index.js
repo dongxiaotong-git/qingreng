@@ -1,5 +1,6 @@
 const cloud = require('wx-server-sdk');
 const https = require('https');
+const crypto = require('crypto');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
@@ -113,11 +114,36 @@ async function getUserPhoneNumber(phoneCode) {
   };
 }
 
+/**
+ * 4) 旧版兼容：基础库 < 2.21.2 的 getPhoneNumber 返回 encryptedData + iv，
+ *    没有 code，需要用 jscode2session 得到的 session_key 做 AES-128-CBC 解密。
+ */
+function decryptPhoneBySessionKey(encryptedData, iv, sessionKey) {
+  const key = Buffer.from(sessionKey, 'base64');
+  const ivBuf = Buffer.from(iv, 'base64');
+  const data = Buffer.from(encryptedData, 'base64');
+
+  const decipher = crypto.createDecipheriv('aes-128-cbc', key, ivBuf);
+  decipher.setAutoPadding(false);
+  let out = Buffer.concat([decipher.update(data), decipher.final()]);
+
+  // 手动去掉 PKCS#7 填充
+  const pad = out[out.length - 1];
+  if (pad >= 1 && pad <= 16) out = out.slice(0, out.length - pad);
+
+  const json = JSON.parse(out.toString('utf8'));
+  // 校验水印，防止换包伪造
+  if (json.watermark && json.watermark.appid && json.watermark.appid !== APPID) {
+    throw new Error('watermark.appid 校验失败');
+  }
+  return json; // { phoneNumber, purePhoneNumber, countryCode, watermark }
+}
+
 /* ------------------------------- 主流程 ------------------------------- */
 exports.main = async (event) => {
   // 注意：不再接受客户端传来的 phone / role
   //   手机号一律由 phoneCode 服务端解密得到，角色一律由后台配置决定，防止客户端自选提权
-  const { code, phoneCode, nickname, avatar } = event;
+  const { code, phoneCode, encryptedData, iv, nickname, avatar } = event;
   if (!code) throw new Error('缺少登录 code');
   if (APPID === 'YOUR_APPID' || SECRET === 'YOUR_SECRET') {
     throw new Error('请先在云函数环境变量配置 WX_APPID / WX_SECRET');
@@ -127,23 +153,28 @@ exports.main = async (event) => {
   const session = await jscode2session(code);
   const openid = session.openid;
 
-  // 2) 手机号：只认微信授权解密的结果，不支持手动输入
+  // 2) 手机号：只认微信授权的数据，不支持手动输入
+  //    优先用新版 code 换，旧版基础库则用 session_key 解密 encryptedData
   let finalPhone = '';
   let phoneFromWx = false;
-  if (!phoneCode) {
-    throw new Error('缺少手机号授权 code，请重新授权手机号后登录');
-  }
   try {
-    const p = await getUserPhoneNumber(phoneCode);
-    if (!p.phone) {
+    if (phoneCode) {
+      const p = await getUserPhoneNumber(phoneCode);
+      finalPhone = p.phone;
+    } else if (encryptedData && iv) {
+      const p = decryptPhoneBySessionKey(encryptedData, iv, session.session_key);
+      finalPhone = p.purePhoneNumber || p.phoneNumber || '';
+    } else {
+      throw new Error('缺少手机号授权信息（code 或 encryptedData）');
+    }
+    if (!finalPhone) {
       throw new Error('微信未返回手机号');
     }
-    finalPhone = p.phone;
     phoneFromWx = true;
   } catch (e) {
-    // 手机号是必填项：解密失败直接抛出，由前端提示用户重新授权
-    // 常见原因：个人主体小程序无 getuserphonenumber 权限 / code 已过期（一次性）
-    console.error('getuserphonenumber failed:', e.message);
+    // 手机号是必填项：拿不到就直接抛出，由前端提示用户重新授权
+    // 常见原因：个人主体无 getuserphonenumber 权限 / code 已用过（一次性）/ 用户拒绝授权
+    console.error('获取手机号失败:', e.message);
     throw new Error(`获取手机号失败：${e.message}`);
   }
 

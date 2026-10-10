@@ -35,28 +35,42 @@ Page({
   },
 
   /**
-   * 登录：本按钮 open-type="getPhoneNumber"，点击即同时触发手机号授权。
-   * 拿到 phoneCode 后立刻 wx.login() 拿 code，两者一起交给云函数。
+   * 登录：本按钮 open-type="getPhoneNumber"，点击即触发手机号授权。
+   * 基础库 2.21.2+ 返回 code（推荐）；旧版返回 encryptedData + iv。两种都接受，
+   * 拿到后连同 wx.login 的 code 一起交给云函数，由服务端解密出真实手机号。
    * 角色不由用户选择，由云函数按手机号查后台配置决定。
    */
   onLogin(e) {
     if (this.data.loading) return;
 
     const detail = (e && e.detail) || {};
-    const code = detail.code;
     const errMsg = detail.errMsg || '';
-    const authorized = !!code && errMsg.indexOf('ok') !== -1;
+    const { code, encryptedData, iv } = detail;
+    const ok = errMsg.indexOf('ok') !== -1;
+    const authorized = ok && (!!code || (!!encryptedData && !!iv));
 
     if (!authorized) {
       // 手机号是必需项：拿不到授权就不放行登录，不能静默跳过这一步。
-      // 常见原因：微信开发者工具不支持手机号授权模拟（必须真机），
-      // 或小程序是个人主体（无 getPhoneNumber 权限），或用户在弹窗里点了拒绝。
+      // 这里把微信返回的原始信息暴露出来，便于定位是权限问题还是用户拒绝。
+      console.warn('[login] getPhoneNumber 回调详情 =', JSON.stringify(detail));
+
+      const raw = errMsg || '（微信未返回 errMsg）';
+      let hint;
+      if (raw.indexOf('no permission') !== -1 || raw.indexOf('not support') !== -1) {
+        hint = '该小程序没有「手机号快速验证」权限。个人主体不支持此能力，'
+             + '需企业主体，并在微信公众平台「功能」里开通手机号快速验证组件。';
+      } else if (raw.indexOf('deny') !== -1 || raw.indexOf('cancel') !== -1) {
+        hint = '你在弹窗里点击了拒绝，请重新点击并选择允许。';
+      } else if (ok) {
+        hint = '授权成功，但微信既未返回 code 也未返回 encryptedData，请更新微信版本后重试。';
+      } else {
+        hint = '开发者工具不支持手机号授权模拟，请改用「真机预览」；'
+             + '真机仍失败通常是未开通手机号验证组件，或小程序主体为个人。';
+      }
+
       wx.showModal({
-        title: '需要授权手机号',
-        content:
-          '本小程序需授权手机号才能登录。\n\n' +
-          '若未弹出选择框，通常是微信开发者工具不支持该能力的模拟，' +
-          '请用「真机预览」或体验版测试。',
+        title: '手机号授权失败',
+        content: `微信返回：${raw}\n\n${hint}`,
         showCancel: false,
         confirmText: '知道了'
       });
@@ -64,18 +78,19 @@ Page({
     }
 
     // 已选完手机号 -> 走 wx.login 登录
-    this.setData({ phoneCode: code });
-    this.doLogin(code);
+    this.setData({ phoneCode: code || '' });
+    this.doLogin({ phoneCode: code, encryptedData, iv });
   },
 
-  doLogin(phoneCode) {
+  doLogin(payload) {
     const d = this.data;
     this.setData({ loading: true });
     wx.showLoading({ title: '登录中...', mask: true });
 
     api.login({
-      phone: d.phone,
-      phoneCode: phoneCode,
+      phoneCode: payload.phoneCode,
+      encryptedData: payload.encryptedData,
+      iv: payload.iv,
       nickname: d.nickname,
       avatar: d.avatar
     })
@@ -86,8 +101,8 @@ Page({
         if (user.phone) {
           this.setData({ phone: user.phone });
         }
-        // 演示模式没有服务端，phoneCode 解不出明文，明确告知而不是留个空格子
-        const tip = (!USE_CLOUD && phoneCode && !user.phone)
+        // 演示模式没有服务端，解不出明文，明确告知而不是留个空格子
+        const tip = (!USE_CLOUD && !user.phone)
           ? '登录成功·演示模式无法解密手机号'
           : '登录成功';
         wx.showToast({ title: tip, icon: 'none', duration: 2200 });
