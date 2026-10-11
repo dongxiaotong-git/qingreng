@@ -56,11 +56,22 @@ Page({
   onLogin() {
     if (this.data.loading) return;
 
+    // 必须先通过微信填写能力获取头像与昵称，不允许跳过直接登录
+    if (!this.data.avatar) {
+      wx.showToast({ title: '请先选择微信头像', icon: 'none' });
+      return;
+    }
+    const nickname = (this.data.nickname || '').trim();
+    if (!nickname) {
+      wx.showToast({ title: '请先填写微信昵称', icon: 'none' });
+      return;
+    }
+
     this.setData({ loading: true });
     wx.showLoading({ title: '登录中...', mask: true });
 
     api.login({
-      nickname: this.data.nickname,
+      nickname,
       avatar: this.data.avatar
     })
       .then(user => {
