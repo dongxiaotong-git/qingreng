@@ -48,7 +48,7 @@
         <text class="arrow">{{openidShort}} 复制</text>
       </view>
       <view class="menu-item" bindtap="switchAccount">
-        <text>🔄 切换身份 / 退出</text>
+        <text>{{isDemo ? '🔄 切换身份 / 退出登录' : '🚪 退出登录'}}</text>
         <text class="arrow">›</text>
       </view>
     </view>

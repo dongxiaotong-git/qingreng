@@ -58,12 +58,16 @@ Page({
     });
   },
 
+  // 演示模式：既能切换角色（方便一个人体验三种视角），也能退出登录
   switchAccount() {
-    // 演示模式（无后台）：直接切换角色，方便一个人体验三种视角
     if (this.data.isDemo) {
       wx.showActionSheet({
-        itemList: ['切换为 普通用户', '切换为 接单员', '切换为 管理员'],
+        itemList: ['切换为 普通用户', '切换为 接单员', '切换为 管理员', '退出登录'],
         success: r => {
+          if (r.tapIndex === 3) {
+            this.logout();
+            return;
+          }
           const roles = ['user', 'courier', 'admin'];
           const role = roles[r.tapIndex];
           if (!role) return;
@@ -77,16 +81,20 @@ Page({
       return;
     }
 
-    // 云模式：角色由服务端按 openid 查 role_bindings 决定，重新登录会重新拉取配置
+    // 云模式：角色由服务端按 openid 查 role_bindings 决定，只能重新登录来刷新
+    this.logout();
+  },
+
+  // 退出登录：清掉本地登录态回到登录页
+  logout() {
     wx.showModal({
-      title: '切换身份',
-      content: '确定退出当前身份并重新登录吗？',
+      title: '退出登录',
+      content: '确定退出当前账号吗？',
       success: r => {
-        if (r.confirm) {
-          api.logout();
-          app.globalData.user = null;
-          wx.reLaunch({ url: '/pages/login/login' });
-        }
+        if (!r.confirm) return;
+        api.logout();
+        app.globalData.user = null;
+        wx.reLaunch({ url: '/pages/login/login' });
       }
     });
   },
