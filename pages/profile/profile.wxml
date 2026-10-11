@@ -43,6 +43,10 @@
         <text>🛡️ 管理员身份</text>
         <text class="arrow">可查看全部订单</text>
       </view>
+      <view class="menu-item" bindtap="copyOpenid">
+        <text>🆔 身份标识（openid）</text>
+        <text class="arrow">{{openidShort}} 复制</text>
+      </view>
       <view class="menu-item" bindtap="switchAccount">
         <text>🔄 切换身份 / 退出</text>
         <text class="arrow">›</text>

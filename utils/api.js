@@ -76,19 +76,20 @@ function persistAvatar(tempPath) {
 /* ----------------------------- 对外接口 ----------------------------- */
 
 /**
- * 登录/注册
- * @param {string} phoneCode     <button open-type="getPhoneNumber"> 拿到的授权 code（基础库 2.21.2+）
- * @param {string} encryptedData 旧版基础库返回的加密数据，与 iv 配对使用
- * @param {string} iv            旧版基础库返回的解密向量
+ * 登录/注册：以 openid 作为用户唯一标识
+ *
+ * 流程：wx.login() 拿 code -> 云函数 jscode2session 换 openid -> 服务端按 openid 判定角色。
+ * 手机号是可选项（个人主体拿不到也不影响登录），角色一律由服务端决定，客户端无法自选。
+ *
  * @param {string} nickname      微信昵称填写能力拿到的昵称
  * @param {string} avatar        微信头像填写能力拿到的临时路径
- * 手机号与角色均由服务端解密/判定，客户端不再传入。
+ * @param {string} phoneCode     可选：<button open-type="getPhoneNumber"> 的授权 code
+ * @param {string} encryptedData 可选：旧版基础库返回的加密数据，与 iv 配对
+ * @param {string} iv            可选：旧版基础库返回的解密向量
  */
-function login({ phoneCode, encryptedData, iv, nickname, avatar }) {
+function login({ nickname, avatar, phoneCode, encryptedData, iv }) {
   return persistAvatar(avatar).then((savedAvatar) => {
     if (USE_CLOUD) {
-      // 标准微信登录：先 wx.login() 拿 code，再让云函数用 jscode2session 换 openid；
-      // phoneCode 一并发给云函数，由服务端调 getuserphonenumber 解密真实手机号。
       return new Promise((resolve, reject) => {
         wx.login({
           success: res => {
@@ -113,11 +114,11 @@ function login({ phoneCode, encryptedData, iv, nickname, avatar }) {
       });
     }
     return new Promise((resolve) => {
-      // 本地演示模式没有服务端，解不出手机号明文。
-      // 保留上次登录的角色/手机号，避免被覆盖重置（角色可在「我的」页切换）。
+      // 本地演示模式没有服务端：生成一个稳定的演示 openid 作为唯一标识。
+      // 复用上次的 openid 与角色，避免被覆盖重置（角色可在「我的」页切换）。
       const prev = wx.getStorageSync(KEY_USER) || {};
       const user = {
-        openid: prev.openid || ('local_' + Date.now()),
+        openid: prev.openid || ('demo_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
         phone: prev.phone || '',
         nickname: nickname || prev.nickname || '微信用户',
         avatar: savedAvatar || prev.avatar || '',

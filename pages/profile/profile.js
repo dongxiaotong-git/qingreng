@@ -9,6 +9,7 @@ Page({
     isAdmin: false,
     isCourier: false,
     isDemo: !USE_CLOUD, // 演示模式下可直接切换角色；云模式角色由后台决定
+    openidShort: '',
     stats: null
   },
 
@@ -22,13 +23,27 @@ Page({
       return;
     }
     app.globalData.user = user;
+    const openid = user.openid || '';
     this.setData({
       user,
       roleLabel: ROLE_LABELS[user.role],
       isAdmin: user.role === 'admin',
-      isCourier: user.role === 'courier'
+      isCourier: user.role === 'courier',
+      openidShort: openid.length > 12 ? openid.slice(0, 10) + '…' : openid
     });
     this.loadStats();
+  },
+
+  // 复制 openid：运营拿到后去云开发控制台的 role_bindings 集合配置角色
+  copyOpenid() {
+    const openid = (this.data.user && this.data.user.openid) || '';
+    if (!openid) return;
+    wx.setClipboardData({
+      data: openid,
+      success: () => {
+        wx.showToast({ title: '身份标识已复制', icon: 'none' });
+      }
+    });
   },
 
   loadStats() {
@@ -62,7 +77,7 @@ Page({
       return;
     }
 
-    // 云模式：角色由后台按手机号配置，需退出后重新授权登录
+    // 云模式：角色由服务端按 openid 查 role_bindings 决定，重新登录会重新拉取配置
     wx.showModal({
       title: '切换身份',
       content: '确定退出当前身份并重新登录吗？',

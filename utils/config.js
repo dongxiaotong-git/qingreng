@@ -15,12 +15,9 @@
 const USE_CLOUD = false;
 const CLOUD_ENV = 'your-cloud-env-id'; // 云开发模式时填写你的环境 ID
 
-// 演示账号：手机号 -> 角色。未配置的手机号默认「普通用户」。
-// 生产环境应按真实业务通过手机号校验角色，这里仅为本地演示提供便捷入口。
-const DEMO_ACCOUNTS = {
-  '13262340679': 'admin',   // 管理员
-  '13262340679': 'courier'  // 接单员
-};
+// 注意：不要在这里维护「手机号 -> 角色」的映射。
+// 用户唯一标识是 openid，角色一律由服务端 wxLogin 读云数据库的 role_bindings 集合决定，
+// 客户端无法自选，避免提权。演示模式（USE_CLOUD=false）下可在「我的」页切换角色体验。
 
 const ROLE_LABELS = {
   admin: '管理员',
@@ -71,7 +68,6 @@ const TIME_SLOTS = [
 module.exports = {
   USE_CLOUD,
   CLOUD_ENV,
-  DEMO_ACCOUNTS,
   ROLE_LABELS,
   PACKAGES,
   TRASH_TYPES,

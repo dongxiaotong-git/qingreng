@@ -76,34 +76,6 @@
   color: #bbb;
 }
 
-/* 手机号：只读展示，由微信授权自动填充 */
-.phone-box {
-  background: #f7f8fa;
-  border: 2rpx dashed #dcdfe6;
-  border-radius: 14rpx;
-  padding: 22rpx 24rpx;
-  min-height: 40rpx;
-}
-.phone-box-ok {
-  border-style: solid;
-  border-color: #b7e8c8;
-  background: #f2fbf5;
-}
-.phone-text {
-  font-size: 32rpx;
-  color: #1a1a1a;
-  font-weight: 600;
-  letter-spacing: 2rpx;
-}
-.phone-placeholder {
-  font-size: 26rpx;
-  color: #b0b4bb;
-}
-.tip {
-  font-size: 22rpx;
-  color: #07c160;
-  margin-top: 10rpx;
-}
 
 /* 登录页不再提供身份选择，角色由后台按手机号配置 */
 

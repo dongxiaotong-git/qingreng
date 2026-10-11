@@ -27,11 +27,10 @@
       />
     </view>
 
-    <!-- 登录按钮即手机号授权按钮：点一次 = 授权手机号 + wx.login 登录 -->
+    <!-- 登录：wx.login 换取 openid 作为唯一标识，权限由服务端按 openid 判定 -->
     <button
       class="btn-primary login-btn"
-      open-type="getPhoneNumber"
-      bindgetphonenumber="onLogin"
+      bindtap="onLogin"
       loading="{{loading}}"
     >微信一键登录</button>
   </view>
