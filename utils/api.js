@@ -54,11 +54,12 @@ function persistImage(tempPath) {
 // 本地模式存本地文件，云模式上传云存储，拿 fileID。
 function persistAvatar(tempPath) {
   if (!tempPath) return Promise.resolve('');
-  // 已经是持久化地址（本地 wxfile 或云 fileID）就不重复处理
+  // 云存储 fileID 或 https 链接视为已持久化，直接复用
   if (tempPath.indexOf('cloud://') === 0 || tempPath.indexOf('https://') === 0) {
     return Promise.resolve(tempPath);
   }
   if (USE_CLOUD) {
+    // 本地临时/wxfile 路径统一上传到云存储拿 fileID（可在多端访问）
     return new Promise((resolve) => {
       const ext = (tempPath.split('.').pop() || 'png').toLowerCase();
       const cloudPath = `avatars/${Date.now()}_${Math.floor(Math.random() * 100000)}.${ext}`;
@@ -70,6 +71,8 @@ function persistAvatar(tempPath) {
       });
     });
   }
+  // 本地模式：wxfile:// 已是持久化路径，无需再处理；其它临时路径 saveFile 落盘
+  if (tempPath.indexOf('wxfile://') === 0) return Promise.resolve(tempPath);
   return persistImage(tempPath);
 }
 

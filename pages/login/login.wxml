@@ -10,7 +10,7 @@
     <view class="field avatar-field">
       <text class="label">头像</text>
       <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-        <image wx:if="{{avatar}}" class="avatar-img" src="{{avatar}}" mode="aspectFill" />
+        <image wx:if="{{avatar}}" class="avatar-img" src="{{avatar}}" mode="aspectFill" binderror="onAvatarError" />
         <view wx:else class="avatar-default">＋</view>
       </button>
     </view>
