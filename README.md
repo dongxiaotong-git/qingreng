@@ -23,9 +23,12 @@
 ### 模式二：微信云开发模式（生产）
 1. 在微信开发者工具中开通「云开发」，拿到**环境 ID**。
 2. 把 `utils/config.js` 改为 `USE_CLOUD = true`，并填写 `CLOUD_ENV = '你的环境ID'`。
-3. 在云开发控制台创建数据库集合：**`orders`**、**`users`**、**`role_bindings`**（权限配置表；orders 建议加索引 `orderNo`、`status`、`openid`）。
-4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 8 个云函数：
-   `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`（旧的 `login` 已被 `wxLogin` 取代，不再需要）。
+3. 创建数据库集合（二选一）：
+   - **一键初始化**：部署 `initDB` 云函数后调用一次，自动建好 `orders` / `users` / `role_bindings` 三个集合（已存在不报错，可重复调）。
+   - **手动创建**：在云开发控制台手动新建这三个集合。
+   - 集合的**权限**与**索引**无法用代码设置，请按 [`DATABASE.md`](./DATABASE.md) 在控制台配置（建议权限统一「仅管理端可读写」，orders 加索引 `orderNo`/`status`/`openid`/`createdAt`）。
+4. 右键 `cloudfunctions/` 下每个文件夹 →「上传并部署：云端安装依赖」，共 9 个云函数：
+   `initDB` / `getProfile` / `genOrderNo` / `createOrder` / `listOrders` / `getOrder` / `acceptOrder` / `completeOrder` / `wxLogin`（旧的 `login` 已被 `wxLogin` 取代，不再需要）。
 
    > **登录流程（以 openid 作为用户唯一标识）**：
    > 1. 登录页点头像（`open-type="chooseAvatar"`）选头像、填昵称（`type="nickname"`）；
